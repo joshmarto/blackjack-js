@@ -43,12 +43,14 @@ const bodyContent = `
         </div>
     </div>
 
-    <div class="row container mt-2">
+    <!--
+    <div class="row container mt-2 resultado">
         <div class="col-9"></div>
         <div class="col">
             <div class="alert alert-info" id="result"></div>
         </div>
     </div>
+    -->
 `;
 
 

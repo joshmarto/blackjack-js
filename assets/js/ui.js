@@ -16,7 +16,7 @@ const bodyContent = `
             <h1>
                 Jugador 1 - <small id="puntosJugador">0</small>
             </h1>
-            <div id="jugador-cartas">
+            <div id="jugador-cartas" class="divCartas">
                 <!--
                 <img src="assets/cartas/2C.png" alt="2 Corazones" class="carta">
                 <img src="assets/cartas/2D.png" alt="2 Diamantes" class="carta">
@@ -32,7 +32,7 @@ const bodyContent = `
             <h1>
                 Casa - <small id="puntosPC">0</small>
             </h1>
-            <div id="computadora-cartas">
+            <div id="computadora-cartas" class="divCartas">
                 <!--
                 <img src="assets/cartas/JD.png" alt="2 Corazones" class="carta">
                 <img src="assets/cartas/red_back.png" alt="red back" class="carta">

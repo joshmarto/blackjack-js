@@ -11,7 +11,7 @@
  * This is named a "Module Pattern"
  */
 
-(() => {
+const moduloBlackjack = (() => {
     'use strict'
 
 
@@ -26,18 +26,14 @@
     const tipos      = ['C', 'D', 'H', 'S'];
     const especiales = ['A', 'J', 'Q', 'K'];
 
-    let puntosJugador = 0,
-        puntosPC      = 0;
     let puntosJugadores = [];
 
     // Referencias del HTML
     let btnPedir,
         btnStop,
         btnNewGame,
-        result,
         displayPuntos,
-        cartasJugador,
-        cartasPC;
+        divCartas;
     document.addEventListener('DOMContentLoaded', main);
 
 
@@ -62,10 +58,10 @@
     // Initialize game
     const initGame = ( players = 2 ) => {
         deck = crearDeck();
-        firstTurnPC();
         for ( let i = 0; i < players; i++ ){
             puntosJugadores.push(0);
         }
+        firstTurnPC();
     };
 
 
@@ -88,36 +84,41 @@
     const valorCarta = ( carta ) => {
         const valor = carta.substring( 0, carta.length - 1 );
         return ( valor === 'J' || valor === 'Q' || valor === 'K' ) ? 10 : 
-            ( valor === 'A' ) ? ( puntosJugador > 10 ) ? 1 : 11 : Number.parseInt(valor);
+            ( valor === 'A' ) ? ( puntosJugadores[0] > 10 ) ? 1 : 11 : Number.parseInt(valor);
     };
 
-    const drawAddCard = ( player ) => {
-        // Draw card
-        const card = pedirCarta();
-        ( player === 'jugador' ) ? puntosJugador += valorCarta(card) : puntosPC += valorCarta(card);
-        // Display points
-        ( player === 'jugador' ) ? displayPuntos[0].innerText = puntosJugador : displayPuntos[1].innerText = puntosPC;
-        // Add card image
+    const accumulatePoints = ( card, turn ) => {
+        puntosJugadores[turn] += valorCarta(card);
+        displayPuntos[turn].innerText = puntosJugadores[turn];
+    };
+
+    const createCard = ( card, turn ) => {
         const newCard = document.createElement('img');
         newCard.alt = card;
         newCard.src = `assets/cartas/${card}.png`;
         newCard.className = 'carta';
-        ( player === 'jugador' ) ? cartasJugador.append( newCard ) : cartasPC.append( newCard );
-    }
+        divCartas[turn].append( newCard );
+    };
+
+    const drawAddCard = ( turn ) => {
+        const card = pedirCarta();
+        accumulatePoints( card, turn );
+        createCard( card, turn );
+    };
 
     const win = () => {
         setTimeout(() => {
-            if ( puntosJugador <= 21 && puntosPC <= 21 ){
-                ( puntosJugador > puntosPC ) ? alert('Jugador gana!') :
-                ( puntosJugador === puntosPC ) ? alert('Empate') : alert('La casa siempre gana :)');
-            } else if ( puntosJugador <= 21 ){
+            if ( puntosJugadores[0] <= 21 && puntosJugadores[1] <= 21 ){
+                ( puntosJugadores[0] > puntosJugadores[1] ) ? alert('Jugador gana!') :
+                ( puntosJugadores[0] === puntosJugadores[1] ) ? alert('Empate') : alert('La casa siempre gana :)');
+            } else if ( puntosJugadores[0] <= 21 ){
                 alert('Jugador gana!');
-            } else if ( puntosPC <= 21 ) {
+            } else if ( puntosJugadores[1] <= 21 ) {
                 alert('La casa gana');
             } else {
                 alert('Nadie gana :(');
             }
-        }, 1500);
+        }, 1000);
     };
 
     const blockBtn = ( btn ) => {
@@ -139,27 +140,28 @@
             console.log( e );
         }
         do{
-            drawAddCard('PC');
+            drawAddCard( puntosJugadores.length - 1 );
             if ( puntosMinimos > 21 ) break;
-        }while ( (puntosPC < puntosMinimos) && (puntosPC <= 21) );
+        }while ( (puntosJugadores[ puntosJugadores.length - 1 ] < puntosMinimos) && (puntosJugadores[ puntosJugadores.length - 1 ] <= 21) );
         win();
     };
 
     const firstTurnPC = () => {
-        drawAddCard('PC');
+        drawAddCard( puntosJugadores.length - 1 );
         const hiddenCard = document.createElement('img');
         hiddenCard.alt = 'Red back';
         hiddenCard.src = 'assets/cartas/red_back.png';
         hiddenCard.className = 'carta back';
-        cartasPC.append( hiddenCard );
+        divCartas[ puntosJugadores.length - 1 ].append( hiddenCard );
     };
 
     // New game
     const newGame = () => {
-        puntosJugador = 0;
-        puntosPC = 0;
-        displayPuntos[0].innerText = puntosJugador;
-        displayPuntos[1].innerText = puntosPC;
+        puntosJugadores[0] = 0;
+        puntosJugadores[1] = 0;
+        displayPuntos.forEach(element => {
+            element.innerText = '0';
+        });
         // result.innerText = 'Jugando...';
         unlockBtn( btnPedir );
         unlockBtn( btnStop  );
@@ -180,22 +182,20 @@
         btnPedir = document.querySelector('#btnPedir');
         btnStop = document.querySelector('#btnStop');
         btnNewGame = document.querySelector('#btnNew');
-        result = document.querySelector('#result');
         displayPuntos = document.querySelectorAll('small');
-        cartasJugador = document.querySelector('#jugador-cartas');
-        cartasPC = document.querySelector('#computadora-cartas');
+        divCartas = document.querySelectorAll('.divCartas');
 
         initGame();
 
         // Draw card
         btnPedir.addEventListener('click', () => {
         
-            drawAddCard('jugador');
-            if ( puntosJugador > 21) {
+            drawAddCard( 0 );
+            if ( puntosJugadores[0] > 21) {
                 blockBtn( btnPedir );
                 blockBtn( btnStop );
-                turnPC( puntosJugador );
-            } else if ( puntosJugador === 21 ){
+                turnPC( puntosJugadores[0] );
+            } else if ( puntosJugadores[0] === 21 ){
                 blockBtn( btnPedir );
                 blockBtn( btnStop  );
                 turnPC();
@@ -205,10 +205,20 @@
         btnStop.addEventListener('click', () => {
             blockBtn( btnPedir );
             blockBtn( btnStop  );
-            turnPC( puntosJugador );
+            turnPC( puntosJugadores[0] );
         });
 
         btnNewGame.addEventListener('click', newGame);
+    };
+
+
+
+
+
+
+
+    return {
+        nuevoJuego: initGame
     };
 })();
 
